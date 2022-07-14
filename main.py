@@ -4,8 +4,8 @@ from methods import ops
 
 app = Flask(__name__)
 
-@app.route("/api/user/<operation>", methods=["POST"])
-def user_api(operation: str):
+@app.route("/api/players/<operation>", methods=["POST"])
+def player_api(operation: str):
     request_args = request.get_json()
 
     if (operation == "signup"):

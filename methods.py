@@ -2,7 +2,7 @@ import uuid
 from flask import jsonify
 from pysondb import db
 
-user_db = db.getDb("db/users.json")
+player_db = db.getDb("db/players.json")
 
 class ops:
     @staticmethod
@@ -37,9 +37,9 @@ class ops:
 
 
         # Essentially checks if an account has been made with this email 
-        if (len(user_db.getByQuery({"email":email})) == 0):
+        if (len(player_db.getByQuery({"email":email})) == 0):
             # TODO: Generate discriminator for username
-            user_id = user_db.add({
+            player_id = player_db.add({
                     "email": email,
                     "username": username,
                     "password": password,
@@ -49,9 +49,9 @@ class ops:
                     }
                 })
 
-            response["Message"] = "Account created succesfully"
+            response["Message"] = "Player account created succesfully"
             response["Code"] = [200, "Success"]
-            response["Content"] = dict(userId=user_id) 
+            response["Content"] = dict(playerID=player_id) 
         
         else:
             response["Message"] = "An account has already been created with this email"
@@ -71,26 +71,26 @@ class ops:
             response["Code"] = [400, "Bad Request"]
             return jsonify(response)
         
-        results = user_db.getByQuery({"email":email})
+        results = player_db.getByQuery({"email":email})
 
         if (len(results) != 0):
-            user_id = results[0].get("id")
+            player_id = results[0].get("id")
             # TODO: Open PR in pysondb fixing incorrect return value 
             # type in docstring for db.find() method
-            user = user_db.find(user_id)
+            player = player_db.find(player_id)
 
-            if (user["password"] != password):
+            if (player["password"] != password):
                 response["Message"] = "Password is incorrect. Please confirm and try again"
                 response["Code"] = [400, "Bad Request"]
                 return jsonify(response)
 
-            user["activity"]["sessionKey"] = str(uuid.uuid1())
-            user["activity"]["loggedIn"] = True
+            player["activity"]["sessionKey"] = str(uuid.uuid1())
+            player["activity"]["loggedIn"] = True
 
             response["Message"] = "Logged in succesfully"
             response["Code"] = [200, "Success"]
-            response["Content"] = dict(sessionKey=user["activity"]["sessionKey"])
-            user_db.updateById(user_id, {"activity":user["activity"]})
+            response["Content"] = dict(sessionKey=player["activity"]["sessionKey"])
+            player_db.updateById(player_id, {"activity":player["activity"]})
 
         else:
             response["Message"] = "Account with stated email could not be found."
@@ -109,23 +109,23 @@ class ops:
             response["Code"] = [400, "Bad Request"]
             return jsonify(response)
         
-        results = user_db.getByQuery({"email":email})
+        results = player_db.getByQuery({"email":email})
 
         if (len(results) != 0):
-            user_id = results[0].get("id")
-            user = user_db.find(user_id)
+            player_id = results[0].get("id")
+            player = player_db.find(player_id)
 
-            if (user["password"] != password):
+            if (player["password"] != password):
                 response["Message"] = "Password is incorrect. Please confirm and try again"
                 response["Code"] = [400, "Bad Request"]
                 return jsonify(response)
 
-            user["activity"]["sessionKey"] = ""
-            user["activity"]["loggedIn"] = False
+            player["activity"]["sessionKey"] = ""
+            player["activity"]["loggedIn"] = False
 
             response["Message"] = "Logged out succesfully"
             response["Code"] = [200, "Success"]
-            user_db.updateById(user_id, {"activity":user["activity"]})
+            player_db.updateById(player_id, {"activity":player["activity"]})
 
         else:
             response["Message"] = "Account with stated email could not be found."
@@ -145,26 +145,26 @@ class ops:
             response["Code"] = [400, "Bad Request"]
             return jsonify(response)
         
-        results = user_db.getByQuery({"email":email})
+        results = player_db.getByQuery({"email":email})
 
         if (len(results) != 0):
-            user_id = results[0].get("id")
-            user = user_db.find(user_id)
+            player_id = results[0].get("id")
+            player = player_db.find(player_id)
 
-            if (user["password"] != password):
+            if (player["password"] != password):
                 response["Message"] = "Password is incorrect. Please confirm and try again"
                 response["Code"] = [400, "Bad Request"]
                 return jsonify(response)
             
             for field, value in payload.items():
-                if field in user.keys():
-                    user[field] = value
+                if field in player.keys():
+                    player[field] = value
 
             # Recommend better way of doing this  -> db.updateTableById() or sumn
-            for field, value in user.items():
-                user_db.updateById(user_id, {field: value})
+            for field, value in player.items():
+                player_db.updateById(player_id, {field: value})
 
-            response["Message"] = "User account data updated succesfully"
+            response["Message"] = "Player account data updated succesfully"
             response["Code"] = [200, "Success"]
 
         else:
@@ -184,20 +184,20 @@ class ops:
             response["Code"] = [400, "Bad Request"]
             return jsonify(response)
         
-        results = user_db.getByQuery({"email":email})
+        results = player_db.getByQuery({"email":email})
 
         if (len(results) != 0):
-            user_id = results[0].get("id")
-            user = user_db.find(user_id)
+            player_id = results[0].get("id")
+            player = player_db.find(player_id)
 
-            if (user["password"] != password):
+            if (player["password"] != password):
                 response["Message"] = "Password is incorrect. Please confirm and try again"
                 response["Code"] = [400, "Bad Request"]
                 return jsonify(response)
             
-            user_db.deleteById(user_id)
+            player_db.deleteById(player_id)
 
-            response["Message"] = "User account deleted succesfully"
+            response["Message"] = "Player account deleted succesfully"
             response["Code"] = [200, "Success"]
 
         else:
